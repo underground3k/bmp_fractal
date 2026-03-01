@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.IO;
 
 namespace bmp_fractal
@@ -6,24 +7,33 @@ namespace bmp_fractal
     class Program
     {
         static int resolution = 1000;
+        static byte[] data = Array.Empty<byte>();
 
         static void Main(string[] args)
         {
-            byte[] resBytes = BitConverter.GetBytes(resolution); //convert from int to byte array
+            int depth = 2; //choose recursion depth
 
-            int rowSize = ((resolution * 3 + 3) / 4) * 4;
-            int dataSize = resolution * rowSize;
-            int fileSize = 54 + dataSize;
+            //every next depth level, the segment is reduced by 4 times. 
+            //max size is when the segment is 1 pixel, so we can calculate the depth as log4(resolution * 0.4) 
+            double initialSide = resolution * 0.4;
 
+            //depth = Math.Max(1, (int)(Math.Log(initialSide) / Math.Log(4)));//max depth
+
+            Console.WriteLine("Recursion depth " + depth);
+
+            byte[] resBytes = BitConverter.GetBytes(resolution);
+            int rowStride = ((resolution * 3 + 3) / 4) * 4; //calculated with padding
+            int byteDataSize = rowStride * resolution;
+            int fileSize = 54 + byteDataSize;
             byte[] fileSizeBytes = BitConverter.GetBytes(fileSize);
-            byte[] dataSizeBytes = BitConverter.GetBytes(dataSize);
+            byte[] dataSizeBytes = BitConverter.GetBytes(byteDataSize);
 
-            var header = new byte[54] {//Antraštė
+            var header = new byte[54] { //header
                     0x42, 0x4d,
                     fileSizeBytes[0], fileSizeBytes[1], fileSizeBytes[2], fileSizeBytes[3], //file size
                     0x0, 0x0, 0x0, 0x0,
                     0x36, 0x0, 0x0, 0x0,
-                    //Antraštės informacija
+                    //header info
                     0x28, 0x0, 0x0, 0x0,
                     resBytes[0], resBytes[1], resBytes[2], resBytes[3], //width
                     resBytes[0], resBytes[1], resBytes[2], resBytes[3], //height
@@ -37,19 +47,76 @@ namespace bmp_fractal
                     0x0, 0x0, 0x0, 0x0
             };
 
+            data = new byte[byteDataSize];
+            Array.Fill<byte>(data, (byte)255); //fills picture with white color
 
-            var data = new byte[dataSize]; //array for pixels
-            Array.Fill<byte>(data, 0xFF); //fill with white
+            //y middle point
+            double cy = resolution / 2.0;
 
+            DrawKoch(0, cy, resolution - 1, cy, depth);
 
             using (FileStream file = new FileStream("sample.bmp", FileMode.Create, FileAccess.Write))
             {
-
                 file.Write(header);
                 file.Write(data);
-
                 file.Close();
             }
+        }
+        static void DrawKoch(double x0, double y0, double x8, double y8, int depth)
+        {
+            if (depth == 0) //base case, draw a straight line
+            {
+                DrawLine(
+                    (int)Math.Round(x0), (int)Math.Round(y0),
+                    (int)Math.Round(x8), (int)Math.Round(y8),
+                    0, 0, 0);
+                return;
+            }
+
+            //direction vectors
+            double dx = (x8 - x0) / 4.0;
+            double dy = (y8 - y0) / 4.0;
+
+            //vector rotation by 90 degrees
+            double px = dy;
+            double py = -dx;
+
+            double x1 = x0 + dx, y1 = y0 + dy; //right
+            double x2 = x1 + px, y2 = y1 + py; //up
+            double x3 = x2 + dx, y3 = y2 + dy; //right
+            double x4 = x3 - px, y4 = y3 - py; //down
+            double x5 = x4 - px, y5 = y4 - py; //down
+            double x6 = x5 + dx, y6 = y5 + dy; //right
+            double x7 = x6 + px, y7 = y6 + py; //up
+
+            DrawKoch(x0, y0, x1, y1, depth - 1); 
+            DrawKoch(x1, y1, x2, y2, depth - 1); 
+            DrawKoch(x2, y2, x3, y3, depth - 1); 
+            DrawKoch(x3, y3, x4, y4, depth - 1); 
+            DrawKoch(x4, y4, x5, y5, depth - 1); 
+            DrawKoch(x5, y5, x6, y6, depth - 1); 
+            DrawKoch(x6, y6, x7, y7, depth - 1); 
+            DrawKoch(x7, y7, x8, y8, depth - 1);
+        }
+
+        static void DrawLine(int x0, int y0, int x1, int y1, byte r, byte g, byte b)
+        {
+            if (x0 == x1) //vertical
+                for (int y = Math.Min(y0, y1); y <= Math.Max(y0, y1); y++)
+                    SetPixel(x0, y, r, g, b);
+            else //horizontal
+                for (int x = Math.Min(x0, x1); x <= Math.Max(x0, x1); x++)
+                    SetPixel(x, y0, r, g, b);
+        }
+
+        static void SetPixel(int x, int y, byte r, byte g, byte b)
+        {
+            if (x < 0 || x >= resolution || y < 0 || y >= resolution) return; //out of bounds
+            int flippedY = resolution - 1 - y; // flip Y
+            int idx = (flippedY * resolution + x) * 3; //index of pixel
+            data[idx] = b;
+            data[idx + 1] = g;
+            data[idx + 2] = r;
         }
     }
 }
