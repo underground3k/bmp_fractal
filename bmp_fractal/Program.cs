@@ -53,7 +53,7 @@ namespace bmp_fractal
             //y middle point
             double cy = resolution / 2.0;
 
-            DrawKoch(0, cy, resolution - 1, cy, depth);
+            DrawRecursive(0, cy, resolution - 1, cy, depth);
 
             using (FileStream file = new FileStream("sample.bmp", FileMode.Create, FileAccess.Write))
             {
@@ -62,7 +62,7 @@ namespace bmp_fractal
                 file.Close();
             }
         }
-        static void DrawKoch(double x0, double y0, double x8, double y8, int depth)
+        static void DrawRecursive(double x0, double y0, double x8, double y8, int depth)
         {
             if (depth == 0) //base case, draw a straight line
             {
@@ -89,14 +89,14 @@ namespace bmp_fractal
             double x6 = x5 + dx, y6 = y5 + dy; //right
             double x7 = x6 + px, y7 = y6 + py; //up
 
-            DrawKoch(x0, y0, x1, y1, depth - 1); 
-            DrawKoch(x1, y1, x2, y2, depth - 1); 
-            DrawKoch(x2, y2, x3, y3, depth - 1); 
-            DrawKoch(x3, y3, x4, y4, depth - 1); 
-            DrawKoch(x4, y4, x5, y5, depth - 1); 
-            DrawKoch(x5, y5, x6, y6, depth - 1); 
-            DrawKoch(x6, y6, x7, y7, depth - 1); 
-            DrawKoch(x7, y7, x8, y8, depth - 1);
+            DrawRecursive(x0, y0, x1, y1, depth - 1); 
+            DrawRecursive(x1, y1, x2, y2, depth - 1); 
+            DrawRecursive(x2, y2, x3, y3, depth - 1); 
+            DrawRecursive(x3, y3, x4, y4, depth - 1); 
+            DrawRecursive(x4, y4, x5, y5, depth - 1); 
+            DrawRecursive(x5, y5, x6, y6, depth - 1); 
+            DrawRecursive(x6, y6, x7, y7, depth - 1); 
+            DrawRecursive(x7, y7, x8, y8, depth - 1);
         }
 
         static void DrawLine(int x0, int y0, int x1, int y1, byte r, byte g, byte b)
