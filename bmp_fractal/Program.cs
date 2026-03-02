@@ -6,18 +6,32 @@ namespace bmp_fractal
 {
     class Program
     {
-        static int resolution = 1000;
+        static int resolution = 2000;
         static byte[] data = Array.Empty<byte>();
 
         static void Main(string[] args)
         {
-            int depth = 2; //choose recursion depth
+            Console.WriteLine("Choose recursion mode: 0- choose depth 1- max depth\n");
+            int mode = Convert.ToInt32(Console.ReadLine().Trim());
+            int depth = 0;
+            if (mode == 0) //choose recursion depth
+            {
+                Console.WriteLine("Choose depth");
 
-            //every next depth level, the segment is reduced by 4 times. 
-            //max size is when the segment is 1 pixel, so we can calculate the depth as log4(resolution * 0.4) 
-            double initialSide = resolution * 0.4;
+                depth = Convert.ToInt32(Console.ReadLine().Trim());
+            }
+            else if (mode == 1)
+            {
+                Console.WriteLine("Max depth");
 
-            //depth = Math.Max(1, (int)(Math.Log(initialSide) / Math.Log(4)));//max depth
+                //every next depth level, the segment is reduced by 4 times. 
+                //max size is when the segment is 1 pixel, so we can calculate the depth as log4(resolution * 0.4) 
+                double initialSide = resolution * 0.4;
+
+                depth = Math.Max(1, (int)(Math.Log(initialSide) / Math.Log(4)));//max depth
+
+            }
+
 
             Console.WriteLine("Recursion depth " + depth);
 
