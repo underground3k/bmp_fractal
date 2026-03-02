@@ -62,6 +62,12 @@ namespace bmp_fractal
                 file.Close();
             }
         }
+
+        //rekurentine lygtis:
+        //T(n) = 8 * T(n-1) + c, T(0) = k
+        //n- rekursijos gylis
+        //c- fiksuotos operacijos viename nelapiniame mazge (25 sudetys, 2 dalybos, 1 salyga)
+        //DrawLine operacijos baziniame lygyje
         static void DrawRecursive(double x0, double y0, double x8, double y8, int depth)
         {
             if (depth == 0) //base case, draw a straight line
@@ -89,13 +95,13 @@ namespace bmp_fractal
             double x6 = x5 + dx, y6 = y5 + dy; //right
             double x7 = x6 + px, y7 = y6 + py; //up
 
-            DrawRecursive(x0, y0, x1, y1, depth - 1); 
-            DrawRecursive(x1, y1, x2, y2, depth - 1); 
-            DrawRecursive(x2, y2, x3, y3, depth - 1); 
-            DrawRecursive(x3, y3, x4, y4, depth - 1); 
-            DrawRecursive(x4, y4, x5, y5, depth - 1); 
-            DrawRecursive(x5, y5, x6, y6, depth - 1); 
-            DrawRecursive(x6, y6, x7, y7, depth - 1); 
+            DrawRecursive(x0, y0, x1, y1, depth - 1);
+            DrawRecursive(x1, y1, x2, y2, depth - 1);
+            DrawRecursive(x2, y2, x3, y3, depth - 1);
+            DrawRecursive(x3, y3, x4, y4, depth - 1);
+            DrawRecursive(x4, y4, x5, y5, depth - 1);
+            DrawRecursive(x5, y5, x6, y6, depth - 1);
+            DrawRecursive(x6, y6, x7, y7, depth - 1);
             DrawRecursive(x7, y7, x8, y8, depth - 1);
         }
 
