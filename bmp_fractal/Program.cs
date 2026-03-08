@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace bmp_fractal
 {
@@ -14,8 +15,8 @@ namespace bmp_fractal
             for (int i = 0; i < 5; i++)
             {
                 string fileName = "sample_" + i;
-                GenerateBmp(resolution, 1, fileName));
-        }
+                GenerateBmp(resolution, 0+i, fileName);
+            }
 
 
 
@@ -23,7 +24,7 @@ namespace bmp_fractal
 
         public static void GenerateBmp(int resolution, int depth, string FileName)
         {
-            static byte[] data = Array.Empty<byte>();
+            byte[] data = Array.Empty<byte>();
 
             if (depth == 0) //if depth = 0, depth mode = max depth
             {
@@ -64,10 +65,10 @@ namespace bmp_fractal
             //y middle point
             double cy = resolution / 2.0;
 
-            DrawRecursive(0, cy, resolution - 1, cy, depth);
+            DrawRecursive(0, cy, resolution - 1, cy, depth, data);
 
             string fullFileName = FileName + ".bmp";
-            using (FileStream file = new FileStream("sample.bmp", FileMode.Create, FileAccess.Write))
+            using (FileStream file = new FileStream(fullFileName, FileMode.Create, FileAccess.Write))
             {
                 file.Write(header);
                 file.Write(data);
@@ -80,14 +81,14 @@ namespace bmp_fractal
         //n- rekursijos gylis
         //c- fiksuotos operacijos viename nelapiniame mazge (25 sudetys, 2 dalybos, 1 salyga)
         //DrawLine operacijos baziniame lygyje
-        static void DrawRecursive(double x0, double y0, double x8, double y8, int depth)
+        static void DrawRecursive(double x0, double y0, double x8, double y8, int depth, byte[] data)
         {
             if (depth == 0) //base case, draw a straight line
             {
                 DrawLine(
                     (int)Math.Round(x0), (int)Math.Round(y0),
                     (int)Math.Round(x8), (int)Math.Round(y8),
-                    0, 0, 0);
+                    0, 0, 0, data);
                 return;
             }
 
@@ -107,27 +108,27 @@ namespace bmp_fractal
             double x6 = x5 + dx, y6 = y5 + dy; //right
             double x7 = x6 + px, y7 = y6 + py; //up
 
-            DrawRecursive(x0, y0, x1, y1, depth - 1);
-            DrawRecursive(x1, y1, x2, y2, depth - 1);
-            DrawRecursive(x2, y2, x3, y3, depth - 1);
-            DrawRecursive(x3, y3, x4, y4, depth - 1);
-            DrawRecursive(x4, y4, x5, y5, depth - 1);
-            DrawRecursive(x5, y5, x6, y6, depth - 1);
-            DrawRecursive(x6, y6, x7, y7, depth - 1);
-            DrawRecursive(x7, y7, x8, y8, depth - 1);
+            DrawRecursive(x0, y0, x1, y1, depth - 1, data);
+            DrawRecursive(x1, y1, x2, y2, depth - 1, data);
+            DrawRecursive(x2, y2, x3, y3, depth - 1, data);
+            DrawRecursive(x3, y3, x4, y4, depth - 1, data);
+            DrawRecursive(x4, y4, x5, y5, depth - 1, data);
+            DrawRecursive(x5, y5, x6, y6, depth - 1, data);
+            DrawRecursive(x6, y6, x7, y7, depth - 1, data);
+            DrawRecursive(x7, y7, x8, y8, depth - 1, data);
         }
 
-        static void DrawLine(int x0, int y0, int x1, int y1, byte r, byte g, byte b)
+        static void DrawLine(int x0, int y0, int x1, int y1, byte r, byte g, byte b, byte[] data)
         {
             if (x0 == x1) //vertical
                 for (int y = Math.Min(y0, y1); y <= Math.Max(y0, y1); y++)
-                    SetPixel(x0, y, r, g, b);
+                    SetPixel(x0, y, r, g, b, data);
             else //horizontal
                 for (int x = Math.Min(x0, x1); x <= Math.Max(x0, x1); x++)
-                    SetPixel(x, y0, r, g, b);
+                    SetPixel(x, y0, r, g, b, data);
         }
 
-        static void SetPixel(int x, int y, byte r, byte g, byte b)
+        static void SetPixel(int x, int y, byte r, byte g, byte b, byte[] data)
         {
             if (x < 0 || x >= resolution || y < 0 || y >= resolution) return; //out of bounds
             int flippedY = resolution - 1 - y; // flip Y
