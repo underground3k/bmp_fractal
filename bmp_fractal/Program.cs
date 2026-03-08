@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.IO;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -7,18 +8,24 @@ namespace bmp_fractal
 {
     class Program
     {
-        static int resolution = 2000;
+        static int resolution = 20000;
 
         static void Main(string[] args)
         {
 
-            for (int i = 0; i < 5; i++)
+            int[] resArr = { 1250, 1250, 2500, 5000, 10000, 20000 }; 
+
+            GenerateBmp(resolution, 1, "sample_max_depth");
+            for (int i = 1; i < 6; i++)
             {
                 string fileName = "sample_" + i;
-                GenerateBmp(resolution, 0+i, fileName);
+                var sw = Stopwatch.StartNew();
+                GenerateBmp(resolution, i, fileName);
+                sw.Stop();
+                Console.WriteLine($"Generated {fileName}.bmp in {sw.Elapsed.TotalMilliseconds} milliseconds.");
             }
 
-
+            
 
         }
 
