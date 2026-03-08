@@ -7,33 +7,30 @@ namespace bmp_fractal
     class Program
     {
         static int resolution = 2000;
-        static byte[] data = Array.Empty<byte>();
 
         static void Main(string[] args)
         {
-            Console.WriteLine("Choose recursion mode: 0- choose depth 1- max depth\n");
-            int mode = Convert.ToInt32(Console.ReadLine().Trim());
-            int depth = 0;
-            if (mode == 0) //choose recursion depth
-            {
-                Console.WriteLine("Choose depth");
 
-                depth = Convert.ToInt32(Console.ReadLine().Trim());
-            }
-            else if (mode == 1)
+            for (int i = 0; i < 5; i++)
             {
-                Console.WriteLine("Max depth");
+                string fileName = "sample_" + i;
+                GenerateBmp(resolution, 1, fileName));
+        }
 
-                //every next depth level, the segment is reduced by 4 times. 
-                //max size is when the segment is 1 pixel, so we can calculate the depth as log4(resolution * 0.4) 
+
+
+        }
+
+        public static void GenerateBmp(int resolution, int depth, string FileName)
+        {
+            static byte[] data = Array.Empty<byte>();
+
+            if (depth == 0) //if depth = 0, depth mode = max depth
+            {
                 double initialSide = resolution * 0.4;
 
                 depth = Math.Max(1, (int)(Math.Log(initialSide) / Math.Log(4)));//max depth
-
             }
-
-
-            Console.WriteLine("Recursion depth " + depth);
 
             byte[] resBytes = BitConverter.GetBytes(resolution);
             int rowStride = ((resolution * 3 + 3) / 4) * 4; //calculated with padding
@@ -69,6 +66,7 @@ namespace bmp_fractal
 
             DrawRecursive(0, cy, resolution - 1, cy, depth);
 
+            string fullFileName = FileName + ".bmp";
             using (FileStream file = new FileStream("sample.bmp", FileMode.Create, FileAccess.Write))
             {
                 file.Write(header);
